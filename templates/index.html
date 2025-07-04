@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Image Classification</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script>
+      let droppedFile = null;
+
+      function highlightDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById("drop-area").classList.add("highlight");
+      }
+      function unhighlightDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById("drop-area").classList.remove("highlight");
+      }
+      function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        unhighlightDrop(e);
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          droppedFile = files[0];
+          document.getElementById("file").files = files;
+          document.getElementById("file-name").innerText = files[0].name;
+        }
+      }
+      function handleFileInput(e) {
+        if (e.target.files.length > 0) {
+          droppedFile = e.target.files[0];
+          document.getElementById("file-name").innerText =
+            e.target.files[0].name;
+        }
+      }
+      async function sendImage() {
+        const formData = new FormData();
+        const fileInput = document.getElementById("file");
+        const file = droppedFile || fileInput.files[0];
+        if (!file) {
+          document.getElementById("result").innerText =
+            "Veuillez sélectionner une image.";
+          return;
+        }
+        formData.append("file", file);
+
+        document.getElementById("result").innerText = "Prédiction en cours...";
+        const response = await fetch("/predict", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        document.getElementById(
+          "result"
+        ).innerText = `Prediction: ${data.class} (${data.confidence}%)`;
+      }
+      window.addEventListener("DOMContentLoaded", () => {
+        const dropArea = document.getElementById("drop-area");
+        dropArea.addEventListener("dragover", highlightDrop);
+        dropArea.addEventListener("dragleave", unhighlightDrop);
+        dropArea.addEventListener("drop", handleDrop);
+        document
+          .getElementById("file")
+          .addEventListener("change", handleFileInput);
+      });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload an Image</h1>
+      <p>Choisir une image parmis ces categories :</p>
+      <p>plane, car, bird, cat, deer, dog, frog, horse, ship, truck</p>
+      <div id="drop-area" class="drop-area">
+        <p>Glissez-déposez une image ici ou cliquez pour sélectionner</p>
+        <input type="file" id="file" accept="image/*" />
+        <span id="file-name"></span>
+      </div>
+      <button onclick="sendImage()">Predict</button>
+      <p id="result"></p>
+    </div>
+  </body>
+</html>
