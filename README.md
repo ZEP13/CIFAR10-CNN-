@@ -93,6 +93,3 @@ IMAGE_CLASSIFICATION/
 
 - Projet réalisé dans le cadre du cours de Machine Learning & Deep Learning.
 
-## Licence
-
-- Ce projet est distribué sous licence MIT ou autre selon vos besoins.
